@@ -13,6 +13,7 @@ class Perceptron:
         # for generating linearly seperable data (V)
         self.V = np.array([x2*y1-x1*y2, y2-y1, x1-x2])
         self.X = self.generatePoints(N)
+        self.iterations = 0
 
     def generatePoints(self, N):
         X = []
@@ -24,19 +25,25 @@ class Perceptron:
             X.append(x_)
         return np.array(X)
 
-    def plot(self, vec=None, save=False):
-        fig = plt.figure(figsize=(6,6))
-        plt.xlim(-1,1)
-        plt.ylim(-1,1)
+    def plot(self, testPts=None, w_=None, save=False):
+
         V = self.V
         a, b = -V[1]/V[2], -V[0]/V[2]
         l = np.linspace(-1,1)
+        
+        fig = plt.figure(figsize=(6,6))
+        plt.xlim(-1,1)
+        plt.ylim(-1,1)
+        plt.title('N = %s, Iteration %s\n' % (str(len(self.X)),str(self.iterations)))
         plt.plot(l, a*l+b, 'k-')
         ax = fig.add_subplot(1,1,1)
         ax.scatter(self.X[:,1:2], self.X[:,2:3], c=self.X[:,3:4], cmap='prism')
-        if (vec is not None and vec[2] != 0):
-            aa, bb = -vec[1]/vec[2], -vec[0]/vec[2]
+        if (w_ is not None and w_[2] != 0):
+            # draw training line
+            aa, bb = -w_[1]/w_[2], -w_[0]/w_[2]
             plt.plot(l, aa*l+bb, 'g-', lw=2)
+        if (testPts is not None):
+            ax.scatter(testPts[:,1:2], testPts[:,2:3], c=testPts[:,3:4], cmap='cool')
         if save:
             plt.savefig('.\gifs\p_N%s' % (str(len(self.X))), dpi=100, bbox_inches='tight')
         else:
@@ -52,10 +59,10 @@ class Perceptron:
         M = len(pts)
         n_mispts = 0
         for x_, s in zip(pts, S):
-            print(x_, ": ", s)
             if int(np.sign(w_.T.dot(x_))) != s:
                 n_mispts += 1
-        print(n_mispts)
+        print("Missed points: %d" % (n_mispts))
+        print("w_: ", w_)
         err = n_mispts / float(M)
         return err
 
@@ -63,40 +70,61 @@ class Perceptron:
         pts = self.X[:,:3]
         S = self.X[:,3:4]
         mispts = []
-        for x,s in zip(pts, S):
-            if int(np.sign(w_.T.dot(x))) != s:
-                mispts.append((x, s))
+        for x,d in zip(pts, S):
+            if int(np.sign(w_.T.dot(x))) != d:
+                mispts.append((x, d))
         return mispts[random.randrange(0, len(mispts))]
 
-    def pla(self, save=False):
+    def pla(self, c=0.01, save=False):
         X = self.X[:,:3]
-        print(self.X)
+
         N = len(X)
         w_ = np.zeros(len(X[0]))
         it = 0
-        print(self.classifyError(w_))
-        while self.classifyError(w_) != 0:
+        print("Iteration %d: " % (it))
+        while self.classifyError(w_) != 0 or it > 10000:
             it += 1
+            print("----------------------------------------------------")
+            print("Iteration %d: " % (it))
             # pick mispicked pt
-            x, s = self.pickMisclPoint(w_)
-            w_ += s*x
+            x, d = self.pickMisclPoint(w_)
+            w_ += c*d*x
             if save:
                 self.plot(vec=w_, save=True)
                 plt.title('N = %s, Iteration %s\n' % (str(N),str(it)))
                 plt.savefig('.\gifs\p_N%s_it%s' % (str(N),str(it)), dpi=100, bbox_inches='tight')
         self.w = w_
+        self.iterations = it
 
-    def checkTestError(self, M, w_):
-        testPts = self.generatePoints(M)
+    def checkTestPoints(self, testPts, w_):
+        print("----------------------------------------------------")
+        print("Test Info")
+        print("----------------------------------------------------")
         return self.classifyError(w_, pts=testPts)
-        
 
-p = Perceptron(50)
-#p.plot()
-p.pla()
-print(p.checkTestError(30, p.w))
-p.plot(vec=p.w)
-#fig = plt.figure()
-#ax = fig.add_subplot(1,1,1)
-#ax.scatter(p.X[:,1:2], p.X[:,2:3], c=p.X[:,3:4], cmap='prism')
-#plt.show()
+
+def testPLA(p):
+    testPts = p.generatePoints(test)
+    print("----------------------------------------------------")
+    print("Testing data:\n", testPts)
+    print("----------------------------------------------------")
+    testError = p.checkTestPoints(testPts, p.w)
+    print("Test Error:", round(testError * 100, 3), "%")
+    print("----------------------------------------------------")
+    return testPts, testError
+    
+# initialize perceptron with 50 training points
+train = 50
+test = 30
+save = False
+p = Perceptron(train)
+print("----------------------------------------------------")
+print("Training data:\n", p.X)
+print("----------------------------------------------------")
+p.pla(save=save) # run pla, save=True to generate gif
+
+testPts, testErr = testPLA(p)
+
+if not save:
+    p.plot(testPts=testPts, w_=p.w)
+
