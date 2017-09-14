@@ -1,3 +1,58 @@
+
+% CS 4710 HW 5
+
+\documentclass{article}
+\usepackage{titling}
+\usepackage{siunitx}	% for scientific notation
+\usepackage{graphicx}
+\usepackage{animate}
+\usepackage{listings}
+\usepackage{microtype}
+
+\setlength{\droptitle}{-9em}
+\emergencystretch=1em
+\begin{document}
+
+\title{CS 4340 - Project PLA}
+\author{Austin Hester}
+\date{September 14, 2017}
+\maketitle
+
+% This makes it so sections aren't automatically numbered
+\makeatletter
+\def\@seccntformat#1{%
+	 \expandafter\ifx\csname c@#1\endcsname\c@section\else
+	  \csname the#1\endcsname\quad
+  \fi}
+\makeatother
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Introduction}
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{./gifs/p_N50_it61.png}
+\end{figure}
+
+\newpage
+\begin{center}
+\section*{Animated GIF of PLA in Action}
+\hspace{-4em} \animategraphics[autoplay,controls,]{1}{./gifs/p_N50_it}{1}{61}
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{The Code}
+\lstset{
+	frame=tb,
+	tabsize=4,
+	showstringspaces=false
+}
+\begin{lstlisting}[language=Python,breaklines=true]
 # Austin Hester
 # 09/13/2017
 # PLA Python Implementation
@@ -132,4 +187,25 @@ testPts, testErr = testPLA(p, test)
 
 if not save:
     p.plot(testPts=testPts, w_=p.w)
+
+
+\end{lstlisting}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Notes}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
