@@ -77,6 +77,7 @@ class Perceptron:
             if int(np.sign(w_.T.dot(x))) != d:
                 mispts.append((x, d))
         return mispts[random.randrange(0, len(mispts))]
+        #return mispts[0]
 
     # Run PLA on data contained in self.X
     def pla(self, c=0.01, save=False):
@@ -126,7 +127,7 @@ p = Perceptron(train)
 print("-----------------------")
 print("Training data:\n", p.X)
 print("-----------------------")
-p.pla(save=save) # run pla, save=True to generate gif
+p.pla(c=0.01, save=save) # run pla, save=True to generate gif
 
 testPts, testErr = testPLA(p, test)
 
