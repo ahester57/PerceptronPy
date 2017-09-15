@@ -27,7 +27,7 @@ class Perceptron:
             X.append(x_)
         return np.array(X)
 
-    def plot(self, testPts=None, w_=None, save=False):
+    def plot(self, testPts=None, w_=None, save=False, dim=3):
         e = len(self.X[0])
         fig = plt.figure(figsize=(6,6))
         plt.xlim(-1,1)
@@ -38,18 +38,28 @@ class Perceptron:
         a, b, c = -V[2]/V[3], -V[1]/V[3], -V[0]/V[2]
         l = np.linspace(-1,1)
         plt.plot(l, a*l+b, 'k-')
-        #ax = fig.add_subplot(1,1,1)
-        gx = fig.add_subplot(111, projection='3d')
-        #ax.scatter(self.X[:,e-3:e-2], self.X[:,e-2:e-1], c=self.X[:,e-1:e], cmap='prism')
-        gx.scatter(self.X[:,e-4:e-3], self.X[:,e-3:e-2], self.X[:,e-2:e-1], c=self.X[:,e-1:e], cmap='prism')
+        if dim == 2:
+            ax = fig.add_subplot(1,1,1)
+            ax.scatter(self.X[:,e-3:e-2], self.X[:,e-2:e-1], c=self.X[:,e-1:e], cmap='prism')
+        elif dim == 3:
+            gx = fig.add_subplot(111, projection='3d')
+            gx.scatter(self.X[:,e-4:e-3], self.X[:,e-3:e-2], self.X[:,e-2:e-1], c=self.X[:,e-1:e], cmap='prism')
         if (w_ is not None and w_[2] != 0):
             # draw training line
             u = len(w_)
-            aa, bb, cc = -w_[u-2]/w_[u-1], -w_[u-3]/w_[u-1], -w_[u-3]/w_[u-1]
-            plt.plot(l, aa*l+bb, 'g-', lw=2)
+            aa, bb, cc = -w_[u-2]/w_[u-1], -w_[u-3]/w_[u-1], -w_[u-4]/w_[u-1]
+            normal = np.array([1,-2,1])
+            point = np.array([aa, bb, cc])
+            dd = -point.dot(normal)
+            xx, yy = np.meshgrid(range(-1,2), range(-1,2))
+            zz = (-normal[0] * xx - normal[1] * yy - dd) * 1.0 / normal[-1]
+            zz = zz / zz.max()
+            #plt.plot(l, aa*l+bb, 'g-', lw=2)
+            gx.plot_surface(xx, yy, zz, alpha=0.2)
         if (testPts is not None):
             # draw test points
             #ax.scatter(testPts[:,1:2], testPts[:,2:3], c=testPts[:,3:4], cmap='cool')
+            gx.scatter(testPts[:,e-4:e-3], testPts[:,e-3:e-2], testPts[:,e-2:e-1], c=testPts[:,e-1:e], cmap='cool')
             print('hi')
         if save:
             plt.savefig('.\gifs\p_N%s' % (str(len(self.X))), dpi=100, bbox_inches='tight')
