@@ -6,20 +6,21 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class Perceptron:
     def __init__(self, N):
-        x1, y1, x2, y2 = [random.uniform(-1, 1) for i in range(4)]
+        x1, y1, z1, x2, y2, z2 = [random.uniform(-1, 1) for i in range(6)]
         # for generating linearly seperable data (V)
-        self.V = np.array([x2*y1-x1*y2, y2-y1, x1-x2])
+        self.V = np.array([z1*x2*y1-z2*x1*y2, x2*y1-x1*y2, y2-y1, x1-x2])
         self.X = self.generatePoints(N)
         self.iterations = 0
 
     def generatePoints(self, N):
         X = []
         for i in range(N):
-            x1, x2 = [random.uniform(-1, 1) for i in range(2)]
-            x_ = np.array([1, x1, x2])
+            x1, x2, x3 = [random.uniform(-1, 1) for i in range(3)]
+            x_ = np.array([1, x1, x2, x3])
             # classify based on V, our PLA does not know this line
             s = int(np.sign(self.V.T.dot(x_)))
             x_ = np.append(x_, [s])
@@ -27,24 +28,29 @@ class Perceptron:
         return np.array(X)
 
     def plot(self, testPts=None, w_=None, save=False):
+        e = len(self.X[0])
         fig = plt.figure(figsize=(6,6))
         plt.xlim(-1,1)
         plt.ylim(-1,1)
         plt.title('N = %s, Iteration %s\n' % (str(len(self.X)),str(self.iterations)))
         # draw line pla is searching for
         V = self.V
-        a, b = -V[1]/V[2], -V[0]/V[2]
+        a, b, c = -V[2]/V[3], -V[1]/V[3], -V[0]/V[2]
         l = np.linspace(-1,1)
         plt.plot(l, a*l+b, 'k-')
-        ax = fig.add_subplot(1,1,1)
-        ax.scatter(self.X[:,1:2], self.X[:,2:3], c=self.X[:,3:4], cmap='prism')
+        #ax = fig.add_subplot(1,1,1)
+        gx = fig.add_subplot(111, projection='3d')
+        #ax.scatter(self.X[:,e-3:e-2], self.X[:,e-2:e-1], c=self.X[:,e-1:e], cmap='prism')
+        gx.scatter(self.X[:,e-4:e-3], self.X[:,e-3:e-2], self.X[:,e-2:e-1], c=self.X[:,e-1:e], cmap='prism')
         if (w_ is not None and w_[2] != 0):
             # draw training line
-            aa, bb = -w_[1]/w_[2], -w_[0]/w_[2]
+            u = len(w_)
+            aa, bb, cc = -w_[u-2]/w_[u-1], -w_[u-3]/w_[u-1], -w_[u-3]/w_[u-1]
             plt.plot(l, aa*l+bb, 'g-', lw=2)
         if (testPts is not None):
             # draw test points
-            ax.scatter(testPts[:,1:2], testPts[:,2:3], c=testPts[:,3:4], cmap='cool')
+            #ax.scatter(testPts[:,1:2], testPts[:,2:3], c=testPts[:,3:4], cmap='cool')
+            print('hi')
         if save:
             plt.savefig('.\gifs\p_N%s' % (str(len(self.X))), dpi=100, bbox_inches='tight')
         else:
@@ -85,7 +91,7 @@ class Perceptron:
     # Run PLA on data contained in self.X
     def pla(self, c=0.01, save=False):
         e = len(self.X[0])
-        X = self.X[:,:e-1] # doesn't know the values except for misclassifpoints
+        X = self.X[:,:e-1] # doesn't know the values except for pickMisclPoint
         N = len(X)
         w_ = np.zeros(len(X[0]))
         it = 0
